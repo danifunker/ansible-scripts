@@ -1,0 +1,7 @@
+---
+- hosts: ubuntu
+  become: yes
+  
+  tasks:
+    - name: Update Systems through apt
+      apt:  state=latest update_cache=yes

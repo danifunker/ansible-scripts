@@ -1,0 +1,7 @@
+---
+- hosts: cent
+  become: yes
+  
+  tasks:
+    - name: Update Systems through yum
+      yum: name=* state=latest update_cache=true

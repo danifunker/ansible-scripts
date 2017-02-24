@@ -1,0 +1,16 @@
+---
+- hosts: alllinux
+  become: yes
+  tasks:
+
+  - name: Add Ansible User
+    user: state=present name=ansible
+
+  - name: Add public key
+    authorized_key: user=ansible key="{{ lookup('file', '/home/ansible/.ssh/id_rsa.pub') }}"
+
+  - name: Add ansible to sudoers
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      line: 'ansible     ALL=(ALL)        NOPASSWD: ALL'
