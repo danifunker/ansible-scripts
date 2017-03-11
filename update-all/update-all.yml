@@ -1,0 +1,35 @@
+---
+- hosts: alllinux
+  become: yes
+  
+  tasks:
+    - name: Update Systems through yum
+      yum: name=* state=latest update_cache=true
+      when: ansible_os_family == "RedHat"
+
+    - name: Update Systems through apt
+      apt:  upgrade=dist update_cache=yes
+      when: ansible_os_family == "Debian"
+
+    - name: Check if reboot required - KERNEL
+      shell: LATESTKERN=$(ls -t /boot/vmlinuz* | sed -n 1p ); LATESTKERN=${LATESTKERN##*vmlinuz-}; test "$LATESTKERN" != $(uname -r) && echo "reboot" || echo "nothing"
+      register: reboot_hint
+      ignore_errors: true
+      changed_when: false
+
+    - name: Check if reboot required - DEBIAN FILE
+      shell: ls /var/run/reboot-required 2&>/dev/null && echo "reboot" || echo "nothing"
+      register: reboot_hint set_when_task_is_skipped=false
+      ignore_errors: true
+      when: ansible_os_family =="Debian"
+      changed_when: false
+  
+    - debug: var=reboot_hint.stdout
+      changed_when: false
+    
+    - name: Rebooting ...
+      command: sleep 5 && shutdown -r now "Reboot required for updated kernel"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when:  reboot_hint.stdout.find("reboot") != -1 
