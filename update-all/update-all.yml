@@ -28,7 +28,7 @@
       changed_when: false
     
     - name: Rebooting ...
-      command: sleep 5 && shutdown -r now "Reboot required for updated kernel"
+      shell: sleep 1 ; shutdown -r now "Reboot required for updated kernel"
       async: 1
       poll: 0
       ignore_errors: true
